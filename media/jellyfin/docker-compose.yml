@@ -5,9 +5,9 @@ services:
     user: 1000:1000
     network_mode: "host"
     volumes:
-      - /home/tony/jellyfin-config:/config # Jellyfin config files
-      - /home/tony/jellyfin-cache:/cache # Jellyfin cache directory
-      - /mnt/jellyfin:/media # Media directory
+      - ./config:/config
+      - ./cache:/cache
+      - /path/to/media:/media
     environment:
       - TZ=America/Chicago
     restart: unless-stopped
