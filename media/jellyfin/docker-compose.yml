@@ -1,0 +1,19 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: 1000:1000
+    network_mode: "host"
+    volumes:
+      - /home/tony/jellyfin-config:/config # Jellyfin config files
+      - /home/tony/jellyfin-cache:/cache # Jellyfin cache directory
+      - /mnt/jellyfin:/media # Media directory
+    environment:
+      - TZ=America/Chicago
+    restart: unless-stopped
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
