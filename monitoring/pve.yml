@@ -1,0 +1,4 @@
+default:
+  user: YOUR_PVE_USER
+  password: YOUR_PVE_PASSWORD
+  verify_ssl: false

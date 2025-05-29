@@ -1,0 +1,75 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    ports:
+      - "9090:9090"
+    networks:
+      - monitor-net
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=CHANGE_THIS_PASSWORD
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitor-net
+    restart: unless-stopped
+
+  fail2ban-exporter:
+    image: registry.gitlab.com/hectorjsmith/fail2ban-prometheus-exporter:latest
+    container_name: fail2ban-exporter
+    volumes:
+      - /var/run/fail2ban/:/var/run/fail2ban:ro
+    ports:
+      - "9191:9191"
+    networks:
+      - monitor-net
+    restart: unless-stopped
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx-exporter
+    command: ["-nginx.scrape-uri=http://YOUR_NGINX_HOST/nginx_status"]
+    ports:
+      - "9113:9113"
+    networks:
+      - monitor-net
+    extra_hosts:
+      - "YOUR_NGINX_HOST:YOUR_NGINX_IP"
+    restart: unless-stopped
+
+  qbittorrent-exporter:
+    image: caseyscarborough/qbittorrent-exporter:latest
+    container_name: qbittorrent-exporter
+    ports:
+      - "17871:17871"
+    environment:
+      - QBITTORRENT_BASE_URL=http://YOUR_QBITTORRENT_HOST:8080
+      - QBITTORRENT_USERNAME=YOUR_USERNAME
+      - QBITTORRENT_PASSWORD=YOUR_PASSWORD
+    networks:
+      - monitor-net
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  monitor-net:
